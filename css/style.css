@@ -1,5 +1,5 @@
 body {
-    background-image: url('images/background.png');
+    background-image: url('../images/background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -12,7 +12,7 @@ body {
 #nave {
     width: 150px;
     height: 150px;
-    background-image: url('images/nave.png');
+    background-image: url('../images/nave.png');
     background-size: contain;
     background-repeat: no-repeat;
     position: absolute;
