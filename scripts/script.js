@@ -4,6 +4,8 @@ let posicaoNave = 0;
 const velocidade = 5;
 const velocidadeMissil = 8;
 const larguraMissil = 70;
+const velocidadeAlien = 2;
+const intervaloSpawnAlien = 1200;
 
 const teclasPressionadas = {
     esquerda: false,
@@ -13,6 +15,10 @@ const teclasPressionadas = {
 
 let ultimoDisparo = 0;
 const intervaloDisparo = 200;  
+let aliensAtivos = 0;
+const aliensDisplay = document.getElementById('aliens');
+const vidasDisplay = document.getElementById('vidas');
+let vidas = parseInt(vidasDisplay.textContent, 10) || 3;
 
 window.addEventListener('load', function() {
     posicaoNave = (window.innerWidth / 2) - (nave.offsetWidth / 2);
@@ -47,7 +53,65 @@ window.addEventListener('load', function() {
             }
         }
     }, 15); /* sixseven fps */
+
+    setInterval(function() {
+        spawnAliens();
+    }, intervaloSpawnAlien);
 });
+
+function spawnAliens() {
+    const alien = document.createElement('div');
+    alien.className = 'alien';
+
+    const larguraAlien = 100;
+    const maxLeft = Math.max(0, window.innerWidth - larguraAlien);
+    const posicaoX = Math.floor(Math.random() * (maxLeft + 1));
+
+    alien.style.left = posicaoX + 'px';
+    alien.style.top = '-80px';
+
+    document.body.appendChild(alien);
+    aliensAtivos += 1;
+    aliensDisplay.textContent = String(aliensAtivos);
+
+    function removerAlien() {
+        if (!alien.isConnected) {
+            return;
+        }
+        alien.remove();
+        aliensAtivos = Math.max(0, aliensAtivos - 1);
+        aliensDisplay.textContent = String(aliensAtivos);
+    }
+
+    const intervalo = setInterval(function() {
+        let posicaoAtual = parseInt(alien.style.top, 10);
+        alien.style.top = (posicaoAtual + velocidadeAlien) + 'px';
+
+        const misseis = document.querySelectorAll('.missil');
+        for (let i = 0; i < misseis.length; i += 1) {
+            const missil = misseis[i];
+            if (colisao(missil, alien)) {
+                missil.remove();
+                clearInterval(intervalo);
+                removerAlien();
+                return;
+            }
+        }
+
+        if (colisao(nave, alien)) {
+            clearInterval(intervalo);
+            removerAlien();
+            vidas = Math.max(0, vidas - 1);
+            vidasDisplay.textContent = String(vidas);
+            return;
+        }
+
+        if (posicaoAtual > window.innerHeight) {
+            clearInterval(intervalo);
+            removerAlien();
+        }
+    }, 20);
+}
 
 function dispararMisseis() {
     const larguraNave = nave.offsetWidth; 
@@ -61,6 +125,17 @@ function dispararMisseis() {
     
     criarMissil(posicaoEsquerda);
     criarMissil(posicaoDireita);
+}
+
+function colisao(a, b) {
+    const ra = a.getBoundingClientRect();
+    const rb = b.getBoundingClientRect();
+    return !(
+        ra.right < rb.left ||
+        ra.left > rb.right ||
+        ra.bottom < rb.top ||
+        ra.top > rb.bottom
+    );
 }
 
 function criarMissil(posicaoX) {

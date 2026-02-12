@@ -59,3 +59,14 @@ body {
     background-repeat: no-repeat;
     position: absolute;
 }
+
+.alien {
+    width: 100px;
+    height: 70px;
+    background-image: url('../images/alien.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    z-index: 10;
+}
