@@ -1,13 +1,52 @@
 const nave = document.getElementById('nave');
 
 let posicaoNave = 0; 
-const velocidade = 10;
+const velocidade = 5;
 const velocidadeMissil = 8;
-const larguraMissil = 70; 
+const larguraMissil = 70;
+
+const teclasPressionadas = {
+    esquerda: false,
+    direita: false,
+    atirar: false
+};
+
+let ultimoDisparo = 0;
+const intervaloDisparo = 200;  
 
 window.addEventListener('load', function() {
     posicaoNave = (window.innerWidth / 2) - (nave.offsetWidth / 2);
     nave.style.left = posicaoNave + 'px';
+    
+     /* gameloop */
+    setInterval(function() {
+        const larguraTela = window.innerWidth;
+        const larguraNave = nave.offsetWidth;
+        
+        if (teclasPressionadas.esquerda) {
+            posicaoNave -= velocidade;
+            if (posicaoNave < 0) {
+                posicaoNave = 0;
+            }  
+        }
+        
+        if (teclasPressionadas.direita) {
+            posicaoNave += velocidade;
+            if (posicaoNave > larguraTela - larguraNave) {
+                posicaoNave = larguraTela - larguraNave;
+            }
+        }
+        
+        nave.style.left = posicaoNave + 'px';
+        
+        if (teclasPressionadas.atirar) {
+            const agora = Date.now();
+            if (agora - ultimoDisparo > intervaloDisparo) {
+                dispararMisseis();
+                ultimoDisparo = agora;
+            }
+        }
+    }, 15); /* sixseven fps */
 });
 
 function dispararMisseis() {
@@ -45,29 +84,33 @@ function criarMissil(posicaoX) {
 }
 
 document.addEventListener('keydown', function(evento) {
-    const larguraTela = window.innerWidth;
-    const larguraNave = nave.offsetWidth;
-    
     if (evento.key === 'ArrowLeft' || evento.key === 'a') {
-        posicaoNave -= velocidade;
-        if (posicaoNave < 0) {
-            posicaoNave = 0;
-        }
+        teclasPressionadas.esquerda = true;
     }
     
     if (evento.key === 'ArrowRight' || evento.key === 'd') {
-        posicaoNave += velocidade;
-        if (posicaoNave > larguraTela - larguraNave) {
-            posicaoNave = larguraTela - larguraNave;
-        }
+        teclasPressionadas.direita = true;
     }
     
     if (evento.key === ' ') {
         evento.preventDefault();
-        dispararMisseis();
+        teclasPressionadas.atirar = true;
+    }
+});
+
+document.addEventListener('keyup', function(evento) {
+    if (evento.key === 'ArrowLeft' || evento.key === 'a') {
+        teclasPressionadas.esquerda = false;
     }
     
-    nave.style.left = posicaoNave + 'px';
+    if (evento.key === 'ArrowRight' || evento.key === 'd') {
+        teclasPressionadas.direita = false;
+    }
+    
+    if (evento.key === ' ') {
+        evento.preventDefault();
+        teclasPressionadas.atirar = false;
+    }
 });
 
 let segundos = 0;
